@@ -1,0 +1,3 @@
+
+go build -a -o mac_bundles/viewer.app/Contents/MacOS/viewer github.com/jlassahn/schematic/viewer
+
