@@ -8,13 +8,9 @@ import (
 	"github.com/jlassahn/schematic"
 )
 
-func CreateSchemaitcView() *SchematicView {
-	return nil
-}
-
 func CreateSchematicViewFromFile(filename string) (*SchematicView, error) {
 
-	schem, err := schematic.LoadSchematic("tschem.json")
+	schem, err := schematic.LoadSchematic(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -39,9 +35,10 @@ func CreateSchematicViewFromFile(filename string) (*SchematicView, error) {
 		submenu.AddMenuItem(item)
 		menu.AddMenuItem(submenu)
 
-	gogui.SetMainMenu(menu)
-
+	//gogui.SetMainMenu(menu) //FIXME remove from GUI API
 	window := gogui.CreateWindow()
+	window.SetMenu(menu)
+
 	ret.window = window
 	window.SetPosition(
 		gogui.Pos(50, 0),
