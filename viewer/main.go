@@ -7,10 +7,18 @@ import (
 	"github.com/jlassahn/gogui"
 )
 
+func handlerOpenFile(name string) error {
+	fmt.Println("FILE OPEN "+name)
+	_,err := CreateSchematicViewFromFile(name)
+	return err
+}
+
 func main() {
 
 	InitShared()
 	defer ExitShared()
+
+	gogui.HandleAppOpenFile(handlerOpenFile)
 
 	myView,_ := CreateSchematicViewFromFile("tschem.json")
 	_ = myView
