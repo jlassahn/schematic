@@ -26,17 +26,18 @@ func CreateSchematicViewFromFile(filename string) (*SchematicView, error) {
 		submenu.AddMenuItem(item)
 		// FIXME add separator
 		item = gogui.CreateTextMenuItem("Quit")
-		item.HandleMenuSelect(ret.fakeMenuHandler)
+		item.HandleMenuSelect(ret.quitMenuHandler)
 		submenu.AddMenuItem(item)
 		menu.AddMenuItem(submenu)
 
 	submenu = gogui.CreateTextMenuItem("File")
 		item = gogui.CreateTextMenuItem("Open...")
+		item.HandleMenuSelect(ret.openMenuHandler)
 		submenu.AddMenuItem(item)
 		menu.AddMenuItem(submenu)
 
 	//gogui.SetMainMenu(menu) //FIXME remove from GUI API
-	window := gogui.CreateWindow()
+	window := gogui.CreateWindow(gogui.WINDOW_NORMAL)
 	window.SetMenu(menu)
 
 	ret.window = window
@@ -96,6 +97,7 @@ func CreateSchematicViewFromFile(filename string) (*SchematicView, error) {
 
 	window.Show()
 
+	ViewListAdd(&ret)
 	return &ret, nil
 }
 
@@ -106,16 +108,30 @@ type SchematicView struct {
 	currentPage int
 }
 
+func (view *SchematicView) Close() error {
+	fmt.Println("FIXME got Close command")
+	return nil
+}
+
 func (view *SchematicView) clickHandler() {
 	fmt.Println("CLICK")
 }
 
 func (view *SchematicView) closeHandler() {
+	fmt.Println("CLOSE HANDLER")
+	view.window.Destroy()
+	ViewListRemove(view)
+
+	//FIXME bookkeeping about open window counts
+	//QuitApp()
+}
+
+func (view *SchematicView) quitMenuHandler() {
 	QuitApp()
 }
 
-func (view *SchematicView) fakeMenuHandler() {
-	fmt.Println("MENU")
+func (view *SchematicView) openMenuHandler() {
+	fmt.Printf("OPEN: [%v]\n", RunOpenDialog())
 }
 
 func (view *SchematicView) drawHandler(gfx gogui.Graphics) {

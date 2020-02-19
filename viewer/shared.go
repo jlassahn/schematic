@@ -6,6 +6,7 @@ import (
 )
 
 var fonts []gogui.Font
+var openDialog gogui.FileDialog
 
 type View interface {
 	Close() error
@@ -37,9 +38,11 @@ func InitShared() {
 		gogui.CreateFont("DejaVuSerif-BoldItalic", gogui.FONT_NORMAL),
 	}
 
+	openDialog = gogui.CreateOpenFileDialog()
 }
 
 func ExitShared() {
+	openDialog.Destroy()
 	gogui.Exit()
 }
 
@@ -47,5 +50,25 @@ func QuitApp() error {
 
 	gogui.StopEventLoop(0)
 	return nil
+}
+
+func RunOpenDialog() string {
+	if openDialog.Run() {
+		return openDialog.GetFile()
+	} else {
+		return ""
+	}
+}
+
+var viewCount int = 0
+func ViewListRemove(view View) {
+	viewCount --
+	if viewCount <= 0 {
+		QuitApp()
+	}
+}
+
+func ViewListAdd(view View) {
+	viewCount ++
 }
 

@@ -20,7 +20,8 @@ func main() {
 
 	gogui.HandleAppOpenFile(handlerOpenFile)
 
-	myView,_ := CreateSchematicViewFromFile("tschem.json")
+	myView,_ := CreateSplashWindow()
+	//CreateSchematicViewFromFile("tschem.json")
 	_ = myView
 
 	ret := gogui.RunEventLoop()
