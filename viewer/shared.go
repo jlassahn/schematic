@@ -2,6 +2,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/jlassahn/gogui"
 )
 
@@ -15,6 +17,8 @@ type View interface {
 func InitShared() {
 
 	gogui.Init()
+
+	viewSet = map[View]bool {}
 
 	fonts = []gogui.Font{
 		gogui.CreateFont("DejaVuSansMono", gogui.FONT_NORMAL),
@@ -46,29 +50,47 @@ func ExitShared() {
 	gogui.Exit()
 }
 
-func QuitApp() error {
+func QuitApp() {
 
-	gogui.StopEventLoop(0)
-	return nil
-}
-
-func RunOpenDialog() string {
-	if openDialog.Run() {
-		return openDialog.GetFile()
-	} else {
-		return ""
+	fmt.Println("QUIT")
+	for view := range viewSet {
+		fmt.Println("Closing window...")
+		view.Close()
 	}
 }
 
+func RunOpenDialog() {
+
+	var name string
+
+	if openDialog.Run() {
+		name = openDialog.GetFile()
+	} else {
+		return
+	}
+
+	_,err := CreateSchematicViewFromFile(name)
+	if err != nil {
+		//FIXME display error
+		return
+	}
+
+	CloseSplashView()
+}
+
 var viewCount int = 0
+var viewSet map[View]bool
+
 func ViewListRemove(view View) {
 	viewCount --
+	delete(viewSet, view)
 	if viewCount <= 0 {
-		QuitApp()
+		gogui.StopEventLoop(0)
 	}
 }
 
 func ViewListAdd(view View) {
 	viewCount ++
+	viewSet[view] = true
 }
 
