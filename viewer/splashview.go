@@ -18,14 +18,14 @@ func CreateSplashWindow() (*SplashView, error) {
 	ret := SplashView{}
 
 	menu := gogui.CreateMenu()
-	submenu := gogui.CreateTextMenuItem("Application")
+	submenu := menu.GetApplicationMenu()
 		item := gogui.CreateTextMenuItem("About")
 		submenu.AddMenuItem(item)
-		// FIXME add separator
+		submenu.AddSeparator()
 		item = gogui.CreateTextMenuItem("Quit")
 		item.HandleMenuSelect(QuitApp)
+		item.SetShortcut("q")
 		submenu.AddMenuItem(item)
-		menu.AddMenuItem(submenu)
 
 	submenu = gogui.CreateTextMenuItem("File")
 		item = gogui.CreateTextMenuItem("Open...")
@@ -83,7 +83,6 @@ type SplashView struct {
 }
 
 func (view *SplashView) Close() error {
-	fmt.Println("CLOSE SPLASH")
 	view.window.Destroy()
 	ViewListRemove(view)
 	return nil

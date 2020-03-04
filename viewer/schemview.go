@@ -21,14 +21,13 @@ func CreateSchematicViewFromFile(filename string) (*SchematicView, error) {
 	ret.currentPage = 1
 
 	menu := gogui.CreateMenu()
-	submenu := gogui.CreateTextMenuItem("Application")
+	submenu := menu.GetApplicationMenu()
 		item := gogui.CreateTextMenuItem("About")
 		submenu.AddMenuItem(item)
 		// FIXME add separator
 		item = gogui.CreateTextMenuItem("Quit")
 		item.HandleMenuSelect(QuitApp)
 		submenu.AddMenuItem(item)
-		menu.AddMenuItem(submenu)
 
 	submenu = gogui.CreateTextMenuItem("File")
 		item = gogui.CreateTextMenuItem("Open...")
@@ -36,7 +35,6 @@ func CreateSchematicViewFromFile(filename string) (*SchematicView, error) {
 		submenu.AddMenuItem(item)
 		menu.AddMenuItem(submenu)
 
-	//gogui.SetMainMenu(menu) //FIXME remove from GUI API
 	window := gogui.CreateWindow(gogui.WINDOW_NORMAL)
 	window.SetMenu(menu)
 
@@ -64,7 +62,6 @@ func CreateSchematicViewFromFile(filename string) (*SchematicView, error) {
 	btnPos := 50
 	button := gogui.CreateTextButton("Button 1")
 	btnHeight := button.GetBestHeight()
-	fmt.Printf("button height = %d\n", btnHeight)
 	button.SetPosition(
 		gogui.Pos(0, 0),
 		gogui.Pos(0, btnPos),
@@ -75,7 +72,6 @@ func CreateSchematicViewFromFile(filename string) (*SchematicView, error) {
 
 	btnPos += btnHeight
 	button = gogui.CreateTextButton("Button 2")
-	fmt.Printf("button height = %d\n", btnHeight)
 	button.SetPosition(
 		gogui.Pos(0, 0),
 		gogui.Pos(0, btnPos),
@@ -86,7 +82,6 @@ func CreateSchematicViewFromFile(filename string) (*SchematicView, error) {
 
 	btnPos += btnHeight
 	button = gogui.CreateTextButton("Button 3")
-	fmt.Printf("button height = %d\n", btnHeight)
 	button.SetPosition(
 		gogui.Pos(0, 0),
 		gogui.Pos(0, btnPos),
@@ -109,7 +104,6 @@ type SchematicView struct {
 }
 
 func (view *SchematicView) Close() error {
-	fmt.Println("FIXME got Close command")
 	view.window.Destroy()
 	ViewListRemove(view)
 	return nil
@@ -120,7 +114,6 @@ func (view *SchematicView) clickHandler() {
 }
 
 func (view *SchematicView) closeHandler() {
-	fmt.Println("CLOSE HANDLER")
 	view.window.Destroy()
 	ViewListRemove(view)
 }

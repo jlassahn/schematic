@@ -2,8 +2,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/jlassahn/gogui"
 )
 
@@ -52,9 +50,7 @@ func ExitShared() {
 
 func QuitApp() {
 
-	fmt.Println("QUIT")
 	for view := range viewSet {
-		fmt.Println("Closing window...")
 		view.Close()
 	}
 }
