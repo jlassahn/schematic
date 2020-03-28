@@ -24,14 +24,25 @@ func CreateSchematicViewFromFile(filename string) (*SchematicView, error) {
 	submenu := menu.GetApplicationMenu()
 		item := gogui.CreateTextMenuItem("About")
 		submenu.AddMenuItem(item)
-		// FIXME add separator
+		submenu.AddSeparator()
 		item = gogui.CreateTextMenuItem("Quit")
 		item.HandleMenuSelect(QuitApp)
+		item.SetShortcut("q")
 		submenu.AddMenuItem(item)
 
 	submenu = gogui.CreateTextMenuItem("File")
 		item = gogui.CreateTextMenuItem("Open...")
 		item.HandleMenuSelect(RunOpenDialog)
+		submenu.AddMenuItem(item)
+		menu.AddMenuItem(submenu)
+
+	submenu = gogui.CreateTextMenuItem("View")
+		item = gogui.CreateTextMenuItem("Zoom In")
+		item.HandleMenuSelect(ret.zoomIn)
+		submenu.AddMenuItem(item)
+
+		item = gogui.CreateTextMenuItem("Zoom Out")
+		item.HandleMenuSelect(ret.zoomOut)
 		submenu.AddMenuItem(item)
 		menu.AddMenuItem(submenu)
 
@@ -47,6 +58,7 @@ func CreateSchematicViewFromFile(filename string) (*SchematicView, error) {
 	window.HandleClose(ret.closeHandler)
 
 	scroll := gogui.CreateScrollBox()
+	ret.scroll = scroll
 	scroll.SetPosition(
 		gogui.Pos(0,100),
 		gogui.Pos(0,50),
@@ -56,6 +68,7 @@ func CreateSchematicViewFromFile(filename string) (*SchematicView, error) {
 	dx := int(float64(schem.Settings.PageWidth)*ret.zoom + 40.0)
 	dy := int(float64(schem.Settings.PageHeight)*ret.zoom + 40.0)
 	scroll.SetContentSize(dx, dy)
+	scroll.SetBackgroundColor(gogui.Color{128, 128, 128, 255})
 	scroll.HandleRedraw(ret.drawHandler)
 	window.AddChild(scroll)
 
@@ -100,6 +113,7 @@ type SchematicView struct {
 	zoom float64
 	schem *schematic.Schematic
 	window gogui.Window
+	scroll gogui.ScrollBox
 	currentPage int
 }
 
@@ -120,6 +134,8 @@ func (view *SchematicView) closeHandler() {
 
 func (view *SchematicView) drawHandler(gfx gogui.Graphics) {
 
+	fmt.Println("DRAW")
+
 	dc := DrawingContext{gfx, view.zoom, 20.0}
 	width := view.schem.Settings.PageWidth
 	height := view.schem.Settings.PageHeight
@@ -127,5 +143,38 @@ func (view *SchematicView) drawHandler(gfx gogui.Graphics) {
 	dc.DrawOutline(width, height)
 	schematic.DrawGrid(dc, width, height)
 	view.schem.DrawPage(dc, view.currentPage)
+}
+
+func (view *SchematicView) zoomIn() {
+	fmt.Println("Zoom IN")
+	//FIXME reorganize
+	view.zoom = view.zoom*2
+	dx := int(float64(view.schem.Settings.PageWidth)*view.zoom + 40.0)
+	dy := int(float64(view.schem.Settings.PageHeight)*view.zoom + 40.0)
+	view.scroll.SetContentSize(dx, dy)
+	view.scroll.ForceRedraw()
+}
+
+func (view *SchematicView) zoomOut() {
+	fmt.Println("Zoom OUT")
+	view.zoom = view.zoom/2
+	dx := int(float64(view.schem.Settings.PageWidth)*view.zoom + 40.0)
+	dy := int(float64(view.schem.Settings.PageHeight)*view.zoom + 40.0)
+
+	fmt.Printf("scrollpos %d, %d  %d, %d\n",
+		view.scroll.GetVisibleWidth(),
+		view.scroll.GetVisibleHeight(),
+		view.scroll.GetVisibleLeft(),
+		view.scroll.GetVisibleTop());
+
+	view.scroll.SetContentSize(dx, dy)
+
+	fmt.Printf("scrollpos %d, %d  %d, %d\n",
+		view.scroll.GetVisibleWidth(),
+		view.scroll.GetVisibleHeight(),
+		view.scroll.GetVisibleLeft(),
+		view.scroll.GetVisibleTop());
+
+	view.scroll.ForceRedraw()
 }
 

@@ -74,8 +74,8 @@ func (dc DrawingContext) Curve(x0 int, y0 int, cx0 int, cy0 int, cx1 int, cy1 in
 }
 
 func (dc DrawingContext) DrawOutline(width int, height int) {
-	dc.SetFillColor(gogui.Color{128, 128, 128, 255})
-	dc.FillCanvas()
+	//dc.SetFillColor(gogui.Color{128, 128, 128, 255})
+	//dc.FillCanvas()
 	dc.SetFillColor(gogui.Color{255, 255, 255, 255})
 	dc.StartPath(dc.coord(0), dc.coord(0))
 	dc.LineTo(dc.coord(width), dc.coord(0))
