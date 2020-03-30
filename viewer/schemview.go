@@ -38,11 +38,13 @@ func CreateSchematicViewFromFile(filename string) (*SchematicView, error) {
 
 	submenu = gogui.CreateTextMenuItem("View")
 		item = gogui.CreateTextMenuItem("Zoom In")
+		item.SetShortcut("+")
 		item.HandleMenuSelect(ret.zoomIn)
 		submenu.AddMenuItem(item)
 
 		item = gogui.CreateTextMenuItem("Zoom Out")
 		item.HandleMenuSelect(ret.zoomOut)
+		item.SetShortcut("-")
 		submenu.AddMenuItem(item)
 		menu.AddMenuItem(submenu)
 
@@ -146,34 +148,52 @@ func (view *SchematicView) drawHandler(gfx gogui.Graphics) {
 }
 
 func (view *SchematicView) zoomIn() {
-	fmt.Println("Zoom IN")
-	//FIXME reorganize
-	view.zoom = view.zoom*2
-	dx := int(float64(view.schem.Settings.PageWidth)*view.zoom + 40.0)
-	dy := int(float64(view.schem.Settings.PageHeight)*view.zoom + 40.0)
-	view.scroll.SetContentSize(dx, dy)
-	view.scroll.ForceRedraw()
+	view.zoomTo(view.zoom*2)
 }
 
 func (view *SchematicView) zoomOut() {
-	fmt.Println("Zoom OUT")
-	view.zoom = view.zoom/2
+	view.zoomTo(view.zoom/2)
+}
+
+func (view *SchematicView) zoomTo(zm float64) {
+
+	fmt.Println("Zoom")
+
+	old_zoom := view.zoom
+	old_dx := int(float64(view.schem.Settings.PageWidth)*view.zoom + 40.0)
+	old_dy := int(float64(view.schem.Settings.PageHeight)*view.zoom + 40.0)
+	view.zoom = zm
 	dx := int(float64(view.schem.Settings.PageWidth)*view.zoom + 40.0)
 	dy := int(float64(view.schem.Settings.PageHeight)*view.zoom + 40.0)
 
-	fmt.Printf("scrollpos %d, %d  %d, %d\n",
-		view.scroll.GetVisibleWidth(),
-		view.scroll.GetVisibleHeight(),
-		view.scroll.GetVisibleLeft(),
-		view.scroll.GetVisibleTop());
+	visible_width := view.scroll.GetVisibleWidth()
+	visible_height := view.scroll.GetVisibleHeight()
+	visible_left := view.scroll.GetVisibleLeft()
+	visible_top := view.scroll.GetVisibleTop()
+	if visible_width > old_dx {
+		visible_width = old_dx
+	}
+	if visible_height > old_dy {
+		visible_height = old_dy
+	}
+
+	center_x := float64(visible_left) + float64(visible_width)/2
+	center_x = (center_x - 40) / old_zoom
+	center_x = center_x*zm + 40
+	center_y := float64(visible_top) + float64(visible_height)/2
+	center_y = (center_y - 40) / old_zoom
+	center_y = center_y*zm + 40
+	left := int(center_x - float64(visible_width)/2)
+	top := int(center_y - float64(visible_height)/2)
+	if left < 0 {
+		left = 0
+	}
+	if top < 0 {
+		top = 0
+	}
 
 	view.scroll.SetContentSize(dx, dy)
-
-	fmt.Printf("scrollpos %d, %d  %d, %d\n",
-		view.scroll.GetVisibleWidth(),
-		view.scroll.GetVisibleHeight(),
-		view.scroll.GetVisibleLeft(),
-		view.scroll.GetVisibleTop());
+	view.scroll.SetVisibleLeftTop(left, top)
 
 	view.scroll.ForceRedraw()
 }
