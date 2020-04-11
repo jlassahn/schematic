@@ -53,6 +53,11 @@ type Schematic struct {
 	Pages       []*Page
 }
 
+type Library struct {
+	Groups map[string] Library
+	Symbols map[string]*SymbolDefinition
+}
+
 type SettingsContainer struct {
 	LengthUnit   string // "cm" "inch"
 	TicksPerUnit int    // usually 120/inch or 48/cm

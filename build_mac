@@ -1,3 +1,4 @@
 
 go build -a -o mac_bundles/viewer.app/Contents/MacOS/viewer github.com/jlassahn/schematic/viewer
 
+go build -a -o mac_bundles/mschem.app/Contents/MacOS/mschem github.com/jlassahn/schematic/mschem
