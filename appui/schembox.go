@@ -3,6 +3,7 @@ package appui
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jlassahn/gogui"
 	"github.com/jlassahn/schematic"
@@ -15,7 +16,10 @@ type schematicBox struct {
 
 	scrollbox gogui.ScrollBox
 	zoom float64
+	xPoint, yPoint int
 	currentPage int
+	snapToGrid bool
+	showRulers bool
 
 	mouseMode MouseMode
 }
@@ -25,6 +29,8 @@ func CreateSchemBox(schem *schematic.Schematic) *schematicBox {
 	ret.zoom = 1.0
 	ret.schem = schem
 	ret.currentPage = 1
+	ret.snapToGrid = true
+	ret.showRulers = true
 
 	ret.scrollbox = gogui.CreateScrollBox()
 	dx := int(float64(schem.Settings.PageWidth)*ret.zoom + 40.0)
@@ -54,9 +60,13 @@ func (box *schematicBox) ZoomOut() {
 	box.zoomTo(box.zoom/2)
 }
 
+func (box *schematicBox) SetMode(mode MouseMode) {
+	box.mouseMode = mode
+}
+
 func (box *schematicBox) drawHandler(gfx gogui.Graphics) {
 
-	fmt.Println("DRAW")
+	t0 := time.Now()
 
 	dc := DrawingContext{gfx, box.zoom, 20.0}
 	width := box.schem.Settings.PageWidth
@@ -64,7 +74,16 @@ func (box *schematicBox) drawHandler(gfx gogui.Graphics) {
 
 	dc.DrawOutline(width, height)
 	schematic.DrawGrid(dc, width, height)
+	if box.showRulers {
+		// FIXME configuration for display colors!
+		dc.Line(0, box.yPoint, width, box.yPoint, 0x1FF0, 3)
+		dc.Line(box.xPoint, 0, box.xPoint, height, 0x1FF0, 3)
+	}
+
 	box.schem.DrawPage(dc, box.currentPage)
+
+	t1 := time.Now()
+	fmt.Printf("DRAW dt = %v\n", t1.Sub(t0))
 }
 
 func (box *schematicBox) zoomTo(zm float64) {
@@ -90,11 +109,11 @@ func (box *schematicBox) zoomTo(zm float64) {
 	}
 
 	center_x := float64(visible_left) + float64(visible_width)/2
-	center_x = (center_x - 40) / old_zoom
-	center_x = center_x*zm + 40
+	center_x = (center_x - 20) / old_zoom
+	center_x = center_x*zm + 20
 	center_y := float64(visible_top) + float64(visible_height)/2
-	center_y = (center_y - 40) / old_zoom
-	center_y = center_y*zm + 40
+	center_y = (center_y - 20) / old_zoom
+	center_y = center_y*zm + 20
 	left := int(center_x - float64(visible_width)/2)
 	top := int(center_y - float64(visible_height)/2)
 	if left < 0 {
@@ -110,8 +129,41 @@ func (box *schematicBox) zoomTo(zm float64) {
 	box.scrollbox.ForceRedraw()
 }
 
+func (box *schematicBox) translateMouseCoords(x int, y int) (int, int) {
+
+	tx := int((float64(x) - 20) / box.zoom)
+	ty := int((float64(y) - 20) / box.zoom)
+	if tx < 0 {
+		tx = 0
+	}
+	if tx > box.schem.Settings.PageWidth {
+		tx = box.schem.Settings.PageWidth
+	}
+
+	if ty < 0 {
+		ty = 0
+	}
+	if ty > box.schem.Settings.PageHeight {
+		ty = box.schem.Settings.PageHeight
+	}
+
+	if box.snapToGrid {
+		tx = 12*((tx + 6)/12)
+		ty = 12*((ty + 6)/12)
+	}
+
+	return tx, ty
+}
+
 func (box *schematicBox) mouseMoveHandler(x int, y int) {
-	fmt.Printf("MOUSE MOVE %v, %v\n", x, y)
+
+	tx, ty := box.translateMouseCoords(x, y)
+	box.mouseMode.MouseMove(tx, ty)
+	if tx != box.xPoint || ty != box.yPoint {
+		box.xPoint = tx
+		box.yPoint = ty
+		box.scrollbox.ForceRedraw()
+	}
 }
 
 func (box *schematicBox) mouseDownHandler(x int, y int, btn int) {

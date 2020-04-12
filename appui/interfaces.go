@@ -30,6 +30,7 @@ type SchemBox interface {
 	Box() gogui.ScrollBox
 	ZoomIn()
 	ZoomOut()
+	SetMode(mode MouseMode)
 }
 
 type SchemView interface {
