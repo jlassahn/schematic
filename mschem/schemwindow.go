@@ -54,6 +54,17 @@ func (ui *MSchemUI) CreateSchematicWindow(schem *schematic.Schematic) appui.Wind
 		submenu.AddMenuItem(item)
 		menu.AddMenuItem(submenu)
 
+	submenu = gogui.CreateTextMenuItem(XLT("Edit"))
+		// FIXME add selection checkmark to these menu items
+		// FIXME add keyboard shortcuts
+		item = gogui.CreateTextMenuItem(XLT("Select Elements"))
+		item.HandleMenuSelect(ret.schemedit.ModeSelect)
+		submenu.AddMenuItem(item)
+		item = gogui.CreateTextMenuItem(XLT("Add Lines"))
+		item.HandleMenuSelect(ret.schemedit.ModeMakeLines)
+		submenu.AddMenuItem(item)
+		menu.AddMenuItem(submenu)
+
 	submenu = gogui.CreateTextMenuItem(XLT("View"))
 		item = gogui.CreateTextMenuItem(XLT("Zoom In"))
 		item.SetShortcut("+")

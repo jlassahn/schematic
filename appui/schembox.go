@@ -13,6 +13,7 @@ import (
 type schematicBox struct {
 
 	schem *schematic.Schematic
+	settings *Settings
 
 	scrollbox gogui.ScrollBox
 	zoom float64
@@ -22,12 +23,15 @@ type schematicBox struct {
 	showRulers bool
 
 	mouseMode MouseMode
+	editOverlay schematic.Overlay
 }
 
 func CreateSchemBox(schem *schematic.Schematic) *schematicBox {
 	ret := schematicBox{}
 	ret.zoom = 1.0
 	ret.schem = schem
+	ret.settings = GlobalSettings
+
 	ret.currentPage = 1
 	ret.snapToGrid = true
 	ret.showRulers = true
@@ -68,11 +72,12 @@ func (box *schematicBox) drawHandler(gfx gogui.Graphics) {
 
 	t0 := time.Now()
 
-	dc := DrawingContext{gfx, box.zoom, 20.0}
+	padding := 20.0
 	width := box.schem.Settings.PageWidth
 	height := box.schem.Settings.PageHeight
 
-	dc.DrawOutline(width, height)
+	dc := GetDrawingContext(gfx, box.settings.DrawSettings, width, height, box.zoom, padding)
+
 	schematic.DrawGrid(dc, width, height)
 	if box.showRulers {
 		// FIXME configuration for display colors!
@@ -81,6 +86,7 @@ func (box *schematicBox) drawHandler(gfx gogui.Graphics) {
 	}
 
 	box.schem.DrawPage(dc, box.currentPage)
+	box.editOverlay.Draw(dc)
 
 	t1 := time.Now()
 	fmt.Printf("DRAW dt = %v\n", t1.Sub(t0))
@@ -168,10 +174,12 @@ func (box *schematicBox) mouseMoveHandler(x int, y int) {
 
 func (box *schematicBox) mouseDownHandler(x int, y int, btn int) {
 	fmt.Printf("MOUSE DOWN %v, %v, %v\n", x, y, btn)
+	box.mouseMode.MouseDown(x, y, btn)
 }
 
 func (box *schematicBox) mouseUpHandler(x int, y int, btn int) {
 	fmt.Printf("MOUSE UP %v, %v, %v\n", x, y, btn)
+	box.mouseMode.MouseUp(x, y, btn)
 }
 
 func (box *schematicBox) mouseEnterHandler() {

@@ -10,8 +10,8 @@ func CreateSchemView(win Window, schembox SchemBox) SchemView {
 	ret.window = win
 	ret.schembox = schembox
 
-	ret.modeselect = CreateModeSelect(&ret)
-	ret.schembox.SetMode(ret.modeselect)
+	ret.modeSelect = CreateModeSelect(&ret) // FIXME viewer modeSelect should be more limited than editor modeSelect
+	ret.schembox.SetMode(ret.modeSelect)
 
 	return &ret
 }
@@ -22,8 +22,9 @@ func CreateSchemEdit(win Window, schembox SchemBox) SchemEdit {
 	ret.window = win
 	ret.schembox = schembox
 
-	ret.modeselect = CreateModeSelect(&ret)
-	ret.schembox.SetMode(ret.modeselect)
+	ret.modeSelect = CreateModeSelect(&ret)
+	ret.modeLine = CreateModeLine(&ret)
+	ret.schembox.SetMode(ret.modeSelect)
 
 	return &ret
 }
@@ -31,11 +32,12 @@ func CreateSchemEdit(win Window, schembox SchemBox) SchemEdit {
 type schemView struct {
 	window Window
 	schembox SchemBox
-	modeselect MouseMode
+	modeSelect MouseMode
 }
 
 type schemEdit struct {
 	schemView
+	modeLine MouseMode
 }
 
 

@@ -25,17 +25,19 @@ var FONT_NAMES = [16]string{
 	"serif_bi",
 }
 
-func (schem *Schematic) ExportSVG(filename string, page int) error {
+func (schem *Schematic) ExportSVG(settings *DrawingSettings, filename string, page int) error {
 
-	fp, err := newSVGFile(filename, schem.Settings.PageWidth, schem.Settings.PageHeight)
+	drv, err := newSVGFile(filename, schem.Settings.PageWidth, schem.Settings.PageHeight)
 	if err != nil {
 		return err
 	}
 
-	DrawGrid(fp, schem.Settings.PageWidth, schem.Settings.PageHeight)
-	schem.DrawPage(fp, page)
+	ctx := WrapDrawingDriver(drv, settings)
 
-	finalize(fp)
+	DrawGrid(ctx, schem.Settings.PageWidth, schem.Settings.PageHeight)
+	schem.DrawPage(ctx, page)
+
+	finalize(drv)
 	return nil
 }
 

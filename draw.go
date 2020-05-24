@@ -4,14 +4,7 @@ import (
 	"fmt"
 )
 
-const (
-	WIRE     = 1
-	BUS      = 2
-	PIN      = 3
-	GRAPHICS = 4
-	MAX_MODE = 5
-)
-
+/* FIXME remove
 var STANDARD_COLORS = [5]int{
 	0x000,
 	0x00F,
@@ -27,6 +20,7 @@ var STANDARD_WIDTHS = [5]int{
 	1,
 	1,
 }
+*/
 
 func DrawGrid(dc DrawingContext, width int, height int) {
 	for x := 12; x < width; x += 12 {
@@ -37,42 +31,28 @@ func DrawGrid(dc DrawingContext, width int, height int) {
 	}
 }
 
+func (overlay *Overlay) Draw(dc DrawingContext) {
+	// FIXME implement
+}
+
 func (schem *Schematic) DrawPage(dc DrawingContext, pg int) {
 
 	page := schem.Pages[pg-1]
 
 	for _, wire := range page.Wires {
-		col := MapColor(wire.Color, WIRE)
-		width := MapWidth(wire.Width, WIRE)
-		dc.Line(wire.X0, wire.Y0, wire.X1, wire.Y1, col, width)
-
-		for _, ann := range wire.Annotations {
-			DrawAnnotation(dc, ann, wire.X0, wire.Y0, 0)
-		}
+		wire.Draw(dc)
 	}
 
 	for _, bus := range page.Busses {
-		col := MapColor(bus.Color, BUS)
-		width := MapWidth(bus.Width, BUS)
-		dc.Line(bus.X0, bus.Y0, bus.X1, bus.Y1, col, width)
-
-		for _, ann := range bus.Annotations {
-			DrawAnnotation(dc, ann, bus.X0, bus.Y0, 0)
-		}
+		bus.Draw(dc)
 	}
+
 	for _, graph := range page.Graphics {
 		DrawGraphics(dc, graph, 0, 0, 0)
 	}
 
 	for _, sym := range page.Symbols {
-
-		//FIXME maybe optimize using a cached definition link?
-		def := schem.Definitions.Symbols[sym.Def]
-		def.Draw(dc, sym.X0, sym.Y0, sym.Rotate)
-
-		for _, ann := range sym.Annotations {
-			DrawAnnotation(dc, ann, sym.X0, sym.Y0, sym.Rotate)
-		}
+		sym.Draw(dc, &schem.Definitions)
 	}
 
 	/* FIXME later
@@ -83,6 +63,38 @@ func (schem *Schematic) DrawPage(dc DrawingContext, pg int) {
 		}
 	}
 	*/
+}
+
+func (wire *Wire) Draw(dc DrawingContext) {
+
+	col := dc.MapColor(wire.Color, WIRE)
+	width := dc.MapWidth(wire.Width, WIRE)
+	dc.Line(wire.X0, wire.Y0, wire.X1, wire.Y1, col, width)
+
+	for _, ann := range wire.Annotations {
+		DrawAnnotation(dc, ann, wire.X0, wire.Y0, 0)
+	}
+}
+
+func (bus *Bus) Draw(dc DrawingContext) {
+
+	col := dc.MapColor(bus.Color, BUS)
+	width := dc.MapWidth(bus.Width, BUS)
+	dc.Line(bus.X0, bus.Y0, bus.X1, bus.Y1, col, width)
+
+	for _, ann := range bus.Annotations {
+		DrawAnnotation(dc, ann, bus.X0, bus.Y0, 0)
+	}
+}
+
+func (sym *Symbol) Draw(dc DrawingContext, defs *DefinitionsContainer) {
+
+	def := defs.Symbols[sym.Def]
+	def.Draw(dc, sym.X0, sym.Y0, sym.Rotate)
+
+	for _, ann := range sym.Annotations {
+		DrawAnnotation(dc, ann, sym.X0, sym.Y0, sym.Rotate)
+	}
 }
 
 func (sd *SymbolDefinition) Draw(dc DrawingContext, xc int, yc int, rot int) {
@@ -121,8 +133,8 @@ func DrawGraphLine(dc DrawingContext, graph *GraphicMark, xc int, yc int, rot in
 	x0, y0 := Rotate(rot, graph.X0, graph.Y0)
 	x1, y1 := Rotate(rot, graph.X1, graph.Y1)
 
-	col := MapColor(graph.Color, GRAPHICS)
-	width := MapWidth(graph.Width, GRAPHICS)
+	col := dc.MapColor(graph.Color, GRAPHICS)
+	width := dc.MapWidth(graph.Width, GRAPHICS)
 	dc.Line(x0+xc, y0+yc, x1+xc, y1+yc, col, width)
 }
 
@@ -132,15 +144,15 @@ func DrawGraphCurve(dc DrawingContext, graph *GraphicMark, xc int, yc int, rot i
 	x1, y1 := Rotate(rot, graph.X1, graph.Y1)
 	cx1, cy1 := Rotate(rot, graph.CX1, graph.CY1)
 
-	col := MapColor(graph.Color, GRAPHICS)
-	width := MapWidth(graph.Width, GRAPHICS)
+	col := dc.MapColor(graph.Color, GRAPHICS)
+	width := dc.MapWidth(graph.Width, GRAPHICS)
 	dc.Curve(x0+xc, y0+yc, cx0+xc, cy0+yc, cx1+xc, cy1+yc, x1+xc, y1+yc, col, width)
 }
 
 func DrawGraphText(dc DrawingContext, graph *GraphicMark, xc int, yc int, rot int) {
 
 	x0, y0 := Rotate(rot, graph.X0, graph.Y0)
-	col := MapColor(graph.Color, GRAPHICS)
+	col := dc.MapColor(graph.Color, GRAPHICS)
 
 	font := graph.Font
 	if font < 4 || font > 15 {
@@ -195,7 +207,7 @@ func DrawAnnotation(dc DrawingContext, ann *Annotation, xc int, yc int, rot int)
 
 	//FIXME duplicating a whole bunch of stuff from DrawGaphText
 	x0, y0 := Rotate(rot, ann.DX, ann.DY)
-	col := MapColor(ann.Color, GRAPHICS) //FIXME is this really GRAPHICS?
+	col := dc.MapColor(ann.Color, GRAPHICS) //FIXME is this really GRAPHICS?
 
 	font := ann.Font
 	if font < 4 || font > 15 {
@@ -246,8 +258,8 @@ func DrawPin(dc DrawingContext, pin *Pin, xc int, yc int, rot int) {
 
 	x0, y0 := Rotate(rot, pin.X0, pin.Y0)
 	x1, y1 := Rotate(rot, pin.X1, pin.Y1)
-	col := MapColor(pin.Color, PIN)
-	width := MapWidth(pin.Width, PIN)
+	col := dc.MapColor(pin.Color, PIN)
+	width := dc.MapWidth(pin.Width, PIN)
 	dc.Line(x0+xc, y0+yc, x1+xc, y1+yc, col, width)
 
 	for _, ann := range pin.Annotations {
@@ -255,6 +267,7 @@ func DrawPin(dc DrawingContext, pin *Pin, xc int, yc int, rot int) {
 	}
 }
 
+/* FIXME remove
 func MapColor(col int, mode int) int {
 	if col&0x1000 == 0x1000 {
 		return col & 0xFFF
@@ -272,6 +285,7 @@ func MapWidth(w int, mode int) int {
 	}
 	return w
 }
+*/
 
 func Rotate(rot int, x int, y int) (int, int) {
 

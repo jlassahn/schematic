@@ -84,6 +84,17 @@ type Page struct {
 	Symbols  []*Symbol
 }
 
+type Overlay struct {
+	XOffset  int
+	YOffset  int
+	Definitions *DefinitionsContainer
+
+	Wires    []*Wire
+	Busses   []*Bus
+	Graphics []*GraphicMark
+	Symbols  []*Symbol
+}
+
 type SymbolDefinition struct {
 	Type               string // "Graphics" "Part" "Net"
 	Pins               []*Pin
