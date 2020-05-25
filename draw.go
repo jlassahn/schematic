@@ -4,24 +4,6 @@ import (
 	"fmt"
 )
 
-/* FIXME remove
-var STANDARD_COLORS = [5]int{
-	0x000,
-	0x00F,
-	0x080,
-	0xF00,
-	0x000,
-}
-
-var STANDARD_WIDTHS = [5]int{
-	1,
-	1,
-	3,
-	1,
-	1,
-}
-*/
-
 func DrawGrid(dc DrawingContext, width int, height int) {
 	for x := 12; x < width; x += 12 {
 		dc.Line(x, 0, x, height, 0xCCC, 1)
@@ -32,7 +14,25 @@ func DrawGrid(dc DrawingContext, width int, height int) {
 }
 
 func (overlay *Overlay) Draw(dc DrawingContext) {
-	// FIXME implement
+
+	// FIXME handle XY offsets
+
+	for _, wire := range overlay.Wires {
+		wire.Draw(dc)
+	}
+	// FIXME do wire connection dots
+
+	for _, bus := range overlay.Busses {
+		bus.Draw(dc)
+	}
+
+	for _, graph := range overlay.Graphics {
+		DrawGraphics(dc, graph, 0, 0, 0)
+	}
+
+	for _, sym := range overlay.Symbols {
+		sym.Draw(dc, overlay.Definitions)
+	}
 }
 
 func (schem *Schematic) DrawPage(dc DrawingContext, pg int) {
@@ -266,26 +266,6 @@ func DrawPin(dc DrawingContext, pin *Pin, xc int, yc int, rot int) {
 		DrawAnnotation(dc, ann, x0+xc, y0+yc, rot)
 	}
 }
-
-/* FIXME remove
-func MapColor(col int, mode int) int {
-	if col&0x1000 == 0x1000 {
-		return col & 0xFFF
-	}
-
-	if col > 0 && col < MAX_MODE {
-		return STANDARD_COLORS[col]
-	}
-	return STANDARD_COLORS[mode]
-}
-
-func MapWidth(w int, mode int) int {
-	if w <= 0 {
-		return STANDARD_WIDTHS[mode]
-	}
-	return w
-}
-*/
 
 func Rotate(rot int, x int, y int) (int, int) {
 

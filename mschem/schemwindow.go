@@ -20,7 +20,7 @@ func (ui *MSchemUI) CreateSchematicWindow(schem *schematic.Schematic) appui.Wind
 	ret.schem = schem
 	ret.window = gogui.CreateWindow(gogui.WINDOW_NORMAL)
 	ret.schembox = appui.CreateSchemBox(ret.schem)
-	ret.schemedit = appui.CreateSchemEdit(&ret, ret.schembox)
+	ret.schemedit = appui.CreateSchemEdit(&ret, ret.schembox, ret.schem)
 
 	el := ret.schembox.Box()
 	el.SetPosition(
@@ -62,6 +62,15 @@ func (ui *MSchemUI) CreateSchematicWindow(schem *schematic.Schematic) appui.Wind
 		submenu.AddMenuItem(item)
 		item = gogui.CreateTextMenuItem(XLT("Add Lines"))
 		item.HandleMenuSelect(ret.schemedit.ModeMakeLines)
+		submenu.AddMenuItem(item)
+		submenu.AddSeparator()
+		item = gogui.CreateTextMenuItem(XLT("Undo"))
+		item.SetShortcut("z")
+		item.HandleMenuSelect(ret.schemedit.Undo)
+		submenu.AddMenuItem(item)
+		item = gogui.CreateTextMenuItem(XLT("Redo"))
+		item.SetShortcut("Z")
+		item.HandleMenuSelect(ret.schemedit.Redo)
 		submenu.AddMenuItem(item)
 		menu.AddMenuItem(submenu)
 

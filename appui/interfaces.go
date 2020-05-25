@@ -31,12 +31,16 @@ type SchemBox interface {
 	ZoomIn()
 	ZoomOut()
 	SetMode(mode MouseMode)
+	GetEditOverlay() *schematic.Overlay
+	GetPageNumber() int
+	Redraw()
 }
 
 type SchemView interface {
 	Close()
 	ZoomIn()
 	ZoomOut()
+	GetPageNumber() int
 	// FIXME SaveAs, Print, etc
 }
 
@@ -44,5 +48,10 @@ type SchemEdit interface {
 	SchemView
 	ModeSelect()
 	ModeMakeLines()
+	Undo()
+	Redo()
+
+	GetEditOverlay() *schematic.Overlay
+	GetUndoBuffer() UndoBuffer
 }
 

@@ -65,7 +65,22 @@ func (box *schematicBox) ZoomOut() {
 }
 
 func (box *schematicBox) SetMode(mode MouseMode) {
+	if box.mouseMode != nil {
+		box.mouseMode.Cancel()
+	}
 	box.mouseMode = mode
+}
+
+func (box *schematicBox) GetEditOverlay() *schematic.Overlay {
+	return &box.editOverlay
+}
+
+func (box *schematicBox) GetPageNumber() int {
+	return box.currentPage
+}
+
+func (box *schematicBox) Redraw() {
+	box.scrollbox.ForceRedraw()
 }
 
 func (box *schematicBox) drawHandler(gfx gogui.Graphics) {
@@ -173,13 +188,19 @@ func (box *schematicBox) mouseMoveHandler(x int, y int) {
 }
 
 func (box *schematicBox) mouseDownHandler(x int, y int, btn int) {
-	fmt.Printf("MOUSE DOWN %v, %v, %v\n", x, y, btn)
-	box.mouseMode.MouseDown(x, y, btn)
+	tx, ty := box.translateMouseCoords(x, y)
+	box.mouseMode.MouseDown(tx, ty, btn)
+	box.xPoint = tx
+	box.yPoint = ty
+	box.scrollbox.ForceRedraw()
 }
 
 func (box *schematicBox) mouseUpHandler(x int, y int, btn int) {
-	fmt.Printf("MOUSE UP %v, %v, %v\n", x, y, btn)
-	box.mouseMode.MouseUp(x, y, btn)
+	tx, ty := box.translateMouseCoords(x, y)
+	box.mouseMode.MouseUp(tx, ty, btn)
+	box.xPoint = tx
+	box.yPoint = ty
+	box.scrollbox.ForceRedraw()
 }
 
 func (box *schematicBox) mouseEnterHandler() {

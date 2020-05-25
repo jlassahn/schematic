@@ -20,7 +20,7 @@ func (ui *ViewerUI) CreateSchematicWindow(schem *schematic.Schematic) appui.Wind
 	ret.schem = schem
 	ret.window = gogui.CreateWindow(gogui.WINDOW_NORMAL)
 	ret.schembox = appui.CreateSchemBox(ret.schem)
-	ret.schemview = appui.CreateSchemView(&ret, ret.schembox)
+	ret.schemview = appui.CreateSchemView(&ret, ret.schembox, ret.schem)
 
 	el := ret.schembox.Box()
 	el.SetPosition(
