@@ -75,10 +75,18 @@ func (ui *MSchemUI) CreateSchematicWindow(schem *schematic.Schematic) appui.Wind
 		submenu.AddMenuItem(item)
 
 	submenu = gogui.CreateTextMenuItem(XLT("File"))
+		item = gogui.CreateTextMenuItem(XLT("New Schematic..."))
+		item.HandleMenuSelect(appui.NewEmptySchematic)
+		submenu.AddMenuItem(item)
+
 		item = gogui.CreateTextMenuItem(XLT("Open..."))
 		item.HandleMenuSelect(appui.RunOpenDialog)
 		submenu.AddMenuItem(item)
-		menu.AddMenuItem(submenu)
+
+		item = gogui.CreateTextMenuItem(XLT("Save As..."))
+		item.HandleMenuSelect(ret.RunSaveAsDialog)
+		submenu.AddMenuItem(item)
+	menu.AddMenuItem(submenu)
 
 	submenu = gogui.CreateTextMenuItem(XLT("Edit"))
 		// FIXME add selection checkmark to these menu items
@@ -124,5 +132,9 @@ func (win *SchematicWindow) Close() error {
 	//FIXME destroy contents
 	win.window.Destroy()
 	return nil
+}
+
+func (win *SchematicWindow) RunSaveAsDialog() {
+	appui.RunSaveAsDialog(win.editState.Schem)
 }
 

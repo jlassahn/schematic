@@ -39,6 +39,15 @@ func (ui *MSchemUI) CreateSplashWindow() appui.Window {
 	button.HandleClick(appui.RunOpenDialog)
 	ret.window.AddChild(button)
 
+	button = gogui.CreateTextButton(XLT("New Schematic..."))
+	button.SetPosition(
+		gogui.Pos(0, 220),
+		gogui.Pos(100, -10-3*btnHeight),
+		gogui.Pos(0, 310),
+		gogui.Pos(100, -10-2*btnHeight))
+	button.HandleClick(appui.NewEmptySchematic)
+	ret.window.AddChild(button)
+
 	menu := gogui.CreateMenu()
 	submenu := menu.GetApplicationMenu()
 		item := gogui.CreateTextMenuItem(XLT("About"))
@@ -51,10 +60,15 @@ func (ui *MSchemUI) CreateSplashWindow() appui.Window {
 		submenu.AddMenuItem(item)
 
 	submenu = gogui.CreateTextMenuItem(XLT("File"))
+		item = gogui.CreateTextMenuItem(XLT("New Schematic..."))
+		item.HandleMenuSelect(appui.NewEmptySchematic)
+		submenu.AddMenuItem(item)
+
 		item = gogui.CreateTextMenuItem(XLT("Open..."))
 		item.HandleMenuSelect(appui.RunOpenDialog)
 		submenu.AddMenuItem(item)
-		menu.AddMenuItem(submenu)
+	menu.AddMenuItem(submenu)
+
 	ret.window.SetMenu(menu)
 
 	ret.window.Show()

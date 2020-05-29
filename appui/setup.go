@@ -8,6 +8,7 @@ import (
 
 var fonts []gogui.Font
 var openDialog gogui.FileDialog
+var saveDialog gogui.FileDialog
 
 var windowCount int = 0
 var windowSet map[Window]bool
@@ -44,6 +45,7 @@ func Init() {
 	}
 
 	openDialog = gogui.CreateOpenFileDialog()
+	saveDialog = gogui.CreateSaveFileDialog()
 }
 
 func Exit() {
@@ -78,6 +80,40 @@ func RunOpenDialog() {
 	}
 
 	handleOpenFile(name)
+}
+
+func NewEmptySchematic() {
+
+	schem := schematic.Schematic {}
+
+	schem.Settings.LengthUnit = "inch"
+	schem.Settings.TicksPerUnit = 120
+	schem.Settings.PageWidth = 1320
+	schem.Settings.PageHeight = 1020
+
+	page := schematic.Page {}
+	schem.Pages = []*schematic.Page{&page}
+
+	win := mainui.CreateSchematicWindow(&schem)
+	windowListAdd(win)
+
+	closeSplashWindow()
+}
+
+func RunSaveAsDialog(schem *schematic.Schematic) {
+
+	var name string
+
+	if saveDialog.Run() {
+		name = saveDialog.GetFile()
+	} else {
+		return
+	}
+
+	err := schem.Save(name)
+	if err != nil {
+		//FIXME show error!
+	}
 }
 
 func TryToClose(win Window) {
