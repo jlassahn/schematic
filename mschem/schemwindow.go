@@ -9,26 +9,52 @@ import (
 
 type SchematicWindow struct {
 	window gogui.Window
-	schem *schematic.Schematic
 	schemedit appui.SchemEdit
-	schembox appui.SchemBox
+
+	editState appui.SchemEditState
 }
 
 func (ui *MSchemUI) CreateSchematicWindow(schem *schematic.Schematic) appui.Window {
 
 	ret := SchematicWindow{}
-	ret.schem = schem
 	ret.window = gogui.CreateWindow(gogui.WINDOW_NORMAL)
-	ret.schembox = appui.CreateSchemBox(ret.schem)
-	ret.schemedit = appui.CreateSchemEdit(&ret, ret.schembox, ret.schem)
 
-	el := ret.schembox.Box()
+	ret.editState.MainWindow = &ret
+	ret.editState.Schem = schem
+	ret.editState.SchemBox = appui.CreateSchemBox(schem)
+
+	ret.schemedit = appui.CreateSchemEdit(&ret.editState)
+
+	el := ret.editState.SchemBox.Box()
 	el.SetPosition(
 		gogui.Pos(0,100),
 		gogui.Pos(0,50),
 		gogui.Pos(100,0),
 		gogui.Pos(100,0))
 	ret.window.AddChild(el)
+
+	//FIXME fake
+	prop := CreatePropertyBox(&ret.editState)
+	prop.FrameBox.SetPosition(
+		gogui.Pos(0,0),
+		gogui.Pos(0,0),
+		gogui.Pos(0,100),
+		gogui.Pos(100,0))
+	ret.window.AddChild(prop.FrameBox)
+
+	/*
+	txt := gogui.CreateTextLineInput()
+	txt.SetText("fake value")
+	txt.HandleChange(FakeTextHandler)
+	txt.SetPosition(
+		gogui.Pos(0,0),
+		gogui.Pos(0,50),
+		gogui.Pos(0,100),
+		gogui.Pos(0,50 + txt.GetBestHeight()))
+	ret.window.AddChild(txt)
+	ret.editState.NewLineWidth = 5
+	ret.editState.NewLineColor = 0x1F0F
+	*/
 
 	ret.window.SetPosition(
 		gogui.Pos(50, 0),

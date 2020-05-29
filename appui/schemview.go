@@ -5,9 +5,11 @@ import (
 	"github.com/jlassahn/schematic"
 )
 
-func CreateSchemView(win Window, schembox SchemBox, schem *schematic.Schematic) SchemView {
+// FIXME pass SchemViewState instead of lots of params
+func CreateSchemView(win Window, schembox SchemBox, schem *schematic.Schematic) SchemView{
 
 	ret := schemView{}
+
 	ret.window = win
 	ret.schembox = schembox
 	ret.schem = schem
@@ -18,17 +20,19 @@ func CreateSchemView(win Window, schembox SchemBox, schem *schematic.Schematic) 
 	return &ret
 }
 
-// FIXME create has too many params
-func CreateSchemEdit(win Window, schembox SchemBox, schem *schematic.Schematic) SchemEdit {
+func CreateSchemEdit(state *SchemEditState) SchemEdit {
 
 	ret := schemEdit{}
-	ret.window = win
-	ret.schembox = schembox
-	ret.schem = schem
-	ret.undoBuffer = CreateUndoBuffer(schem)
+
+	ret.editState = state
+	// FIXME include state by reference instead of copying
+	ret.window = state.MainWindow
+	ret.schembox = state.SchemBox
+	ret.schem = state.Schem
+	ret.undoBuffer = CreateUndoBuffer(state.Schem)
 
 	ret.modeSelect = CreateModeSelect(&ret)
-	ret.modeLine = CreateModeLine(&ret)
+	ret.modeLine = CreateModeLine(&ret, state)
 	ret.schembox.SetMode(ret.modeSelect)
 
 	return &ret
@@ -44,6 +48,7 @@ type schemView struct {
 
 type schemEdit struct {
 	schemView
+	editState *SchemEditState
 	undoBuffer UndoBuffer
 
 	modeLine MouseMode

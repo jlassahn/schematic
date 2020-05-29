@@ -10,16 +10,21 @@ import (
 
 type ModeLine struct {
 	schemEdit SchemEdit
+	editState *SchemEditState
 }
 
-func CreateModeLine(sch SchemEdit) MouseMode {
+func CreateModeLine(sch SchemEdit, state *SchemEditState) MouseMode {
 
 	ret := ModeLine{}
 	ret.schemEdit = sch
+	ret.editState = state
 
 	return &ret
 }
 
+
+// FIXME if color or width is changed in the properties panel, how does
+//       the overlay graphics get refreshed?
 
 func (mode *ModeLine) MouseMove(x int, y int) {
 	fmt.Printf("LINE move %v, %v\n", x, y)
@@ -28,7 +33,8 @@ func (mode *ModeLine) MouseMove(x int, y int) {
 	if len(ovr.Graphics) > 0 {
 		ovr.Graphics[0].X1 = x
 		ovr.Graphics[0].Y1 = y
-		//FIXME color, width
+		ovr.Graphics[0].Width = mode.editState.NewLineWidth
+		ovr.Graphics[0].Color = mode.editState.NewLineColor
 	}
 }
 
@@ -42,6 +48,8 @@ func (mode *ModeLine) MouseDown(x int, y int, btn int) {
 
 		g.X1 = x
 		g.Y1 = y
+		g.Width = mode.editState.NewLineWidth
+		g.Color = mode.editState.NewLineColor
 
 		cmd := CmdCreateGraphics {
 			Page: mode.schemEdit.GetPageNumber(),
@@ -57,7 +65,8 @@ func (mode *ModeLine) MouseDown(x int, y int, btn int) {
 			Y0: y,
 			X1: x,
 			Y1: y,
-			//FIXME color, width
+			Width: mode.editState.NewLineWidth,
+			Color: mode.editState.NewLineColor,
 		}
 		ovr.Graphics = []*schematic.GraphicMark{ &line }
 	}

@@ -55,3 +55,12 @@ type SchemEdit interface {
 	GetUndoBuffer() UndoBuffer
 }
 
+type SchemEditState struct {
+	MainWindow Window
+	Schem *schematic.Schematic
+	SchemBox SchemBox
+
+	NewLineColor int
+	NewLineWidth int
+}
+
