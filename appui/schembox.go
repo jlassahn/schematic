@@ -40,6 +40,7 @@ func CreateSchemBox(schem *schematic.Schematic) *schematicBox {
 	dx := int(float64(schem.Settings.PageWidth)*ret.zoom + 40.0)
 	dy := int(float64(schem.Settings.PageHeight)*ret.zoom + 40.0)
 	ret.scrollbox.SetContentSize(dx, dy)
+	//FIXME set initial scroll position
 	ret.scrollbox.SetBackgroundColor(gogui.Color{128, 128, 128, 255})
 	ret.scrollbox.HandleRedraw(ret.drawHandler)
 	ret.scrollbox.HandleMouseMove(ret.mouseMoveHandler)
@@ -109,7 +110,7 @@ func (box *schematicBox) drawHandler(gfx gogui.Graphics) {
 
 func (box *schematicBox) zoomTo(zm float64) {
 
-	fmt.Println("Zoom")
+	fmt.Printf("Zoom %v\n", zm)
 
 	old_zoom := box.zoom
 	old_dx := int(float64(box.schem.Settings.PageWidth)*box.zoom + 40.0)

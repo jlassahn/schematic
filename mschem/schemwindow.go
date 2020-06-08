@@ -14,6 +14,8 @@ type SchematicWindow struct {
 	editState appui.SchemEditState
 }
 
+var windowPosition int
+
 func (ui *MSchemUI) CreateSchematicWindow(schem *schematic.Schematic) appui.Window {
 
 	ret := SchematicWindow{}
@@ -42,25 +44,15 @@ func (ui *MSchemUI) CreateSchematicWindow(schem *schematic.Schematic) appui.Wind
 		gogui.Pos(100,0))
 	ret.window.AddChild(prop.FrameBox)
 
-	/*
-	txt := gogui.CreateTextLineInput()
-	txt.SetText("fake value")
-	txt.HandleChange(FakeTextHandler)
-	txt.SetPosition(
-		gogui.Pos(0,0),
-		gogui.Pos(0,50),
-		gogui.Pos(0,100),
-		gogui.Pos(0,50 + txt.GetBestHeight()))
-	ret.window.AddChild(txt)
-	ret.editState.NewLineWidth = 5
-	ret.editState.NewLineColor = 0x1F0F
-	*/
+	posX := (windowPosition & 3)*5
+	posY := (windowPosition & 12)
+	windowPosition = (windowPosition + 7) & 15
 
 	ret.window.SetPosition(
-		gogui.Pos(50, 0),
-		gogui.Pos(10, 0),
-		gogui.Pos(75, 0),
-		gogui.Pos(50, 0))
+		gogui.Pos(20, posX),
+		gogui.Pos(10, posY),
+		gogui.Pos(80, posX),
+		gogui.Pos(90, posY))
 	ret.window.HandleClose(ret.schemedit.Close)
 
 	menu := gogui.CreateMenu()
@@ -85,6 +77,10 @@ func (ui *MSchemUI) CreateSchematicWindow(schem *schematic.Schematic) appui.Wind
 
 		item = gogui.CreateTextMenuItem(XLT("Save As..."))
 		item.HandleMenuSelect(ret.RunSaveAsDialog)
+		submenu.AddMenuItem(item)
+
+		item = gogui.CreateTextMenuItem(XLT("Export SVG..."))
+		item.HandleMenuSelect(ret.RunSVGDialog)
 		submenu.AddMenuItem(item)
 	menu.AddMenuItem(submenu)
 
@@ -136,5 +132,9 @@ func (win *SchematicWindow) Close() error {
 
 func (win *SchematicWindow) RunSaveAsDialog() {
 	appui.RunSaveAsDialog(win.editState.Schem)
+}
+
+func (win *SchematicWindow) RunSVGDialog() {
+	appui.RunSVGDialog(win.editState.Schem, win.editState.SchemBox.GetPageNumber())
 }
 

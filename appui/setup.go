@@ -86,6 +86,7 @@ func NewEmptySchematic() {
 
 	schem := schematic.Schematic {}
 
+	// FIXME make an initial settings dialog or something
 	schem.Settings.LengthUnit = "inch"
 	schem.Settings.TicksPerUnit = 120
 	schem.Settings.PageWidth = 1320
@@ -111,6 +112,22 @@ func RunSaveAsDialog(schem *schematic.Schematic) {
 	}
 
 	err := schem.Save(name)
+	if err != nil {
+		//FIXME show error!
+	}
+}
+
+func RunSVGDialog(schem *schematic.Schematic, page int) {
+
+	var name string
+
+	if saveDialog.Run() {
+		name = saveDialog.GetFile()
+	} else {
+		return
+	}
+
+	err := schem.ExportSVG(globalSettings.DrawSettings, name, page)
 	if err != nil {
 		//FIXME show error!
 	}

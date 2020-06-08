@@ -34,7 +34,7 @@ func (schem *Schematic) ExportSVG(settings *DrawingSettings, filename string, pa
 
 	ctx := WrapDrawingDriver(drv, settings)
 
-	DrawGrid(ctx, schem.Settings.PageWidth, schem.Settings.PageHeight)
+	//DrawGrid(ctx, schem.Settings.PageWidth, schem.Settings.PageHeight)
 	schem.DrawPage(ctx, page)
 
 	finalize(drv)
