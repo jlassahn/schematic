@@ -27,7 +27,7 @@ func (overlay *Overlay) Draw(dc DrawingContext) {
 	}
 
 	for _, graph := range overlay.Graphics {
-		DrawGraphics(dc, graph, 0, 0, 0)
+		graph.Draw(dc, 0, 0, 0)
 	}
 
 	for _, sym := range overlay.Symbols {
@@ -48,7 +48,7 @@ func (schem *Schematic) DrawPage(dc DrawingContext, pg int) {
 	}
 
 	for _, graph := range page.Graphics {
-		DrawGraphics(dc, graph, 0, 0, 0)
+		graph.Draw(dc, 0, 0, 0)
 	}
 
 	for _, sym := range page.Symbols {
@@ -72,7 +72,7 @@ func (wire *Wire) Draw(dc DrawingContext) {
 	dc.Line(wire.X0, wire.Y0, wire.X1, wire.Y1, col, width)
 
 	for _, ann := range wire.Annotations {
-		DrawAnnotation(dc, ann, wire.X0, wire.Y0, 0)
+		ann.Draw(dc, wire.X0, wire.Y0, 0)
 	}
 }
 
@@ -83,7 +83,7 @@ func (bus *Bus) Draw(dc DrawingContext) {
 	dc.Line(bus.X0, bus.Y0, bus.X1, bus.Y1, col, width)
 
 	for _, ann := range bus.Annotations {
-		DrawAnnotation(dc, ann, bus.X0, bus.Y0, 0)
+		ann.Draw(dc, bus.X0, bus.Y0, 0)
 	}
 }
 
@@ -93,43 +93,43 @@ func (sym *Symbol) Draw(dc DrawingContext, defs *DefinitionsContainer) {
 	def.Draw(dc, sym.X0, sym.Y0, sym.Rotate)
 
 	for _, ann := range sym.Annotations {
-		DrawAnnotation(dc, ann, sym.X0, sym.Y0, sym.Rotate)
+		ann.Draw(dc, sym.X0, sym.Y0, sym.Rotate)
 	}
 }
 
 func (sd *SymbolDefinition) Draw(dc DrawingContext, xc int, yc int, rot int) {
 
 	for _, pin := range sd.Pins {
-		DrawPin(dc, pin, xc, yc, rot)
+		pin.Draw(dc, xc, yc, rot)
 	}
 
 	for _, graph := range sd.Graphics {
-		DrawGraphics(dc, graph, xc, yc, rot)
+		graph.Draw(dc, xc, yc, rot)
 	}
 
 	for _, ann := range sd.Annotations {
-		DrawAnnotation(dc, ann, xc, yc, rot)
+		ann.Draw(dc, xc, yc, rot)
 	}
 }
 
-func DrawGraphics(dc DrawingContext, graph *GraphicMark, x0 int, y0 int, rot int) {
+func (graph *GraphicMark) Draw(dc DrawingContext, x0 int, y0 int, rot int) {
 
 	switch graph.Type {
 	case "Line":
-		DrawGraphLine(dc, graph, x0, y0, rot)
+		graph.drawLine(dc, x0, y0, rot)
 
 	case "Curve":
-		DrawGraphCurve(dc, graph, x0, y0, rot)
+		graph.drawCurve(dc, x0, y0, rot)
 
 	case "Text":
-		DrawGraphText(dc, graph, x0, y0, rot)
+		graph.drawText(dc, x0, y0, rot)
 
 	default:
 		fmt.Println("GRAPH UNKNOWN") //FIXME error handling
 	}
 }
 
-func DrawGraphLine(dc DrawingContext, graph *GraphicMark, xc int, yc int, rot int) {
+func (graph *GraphicMark) drawLine(dc DrawingContext, xc int, yc int, rot int) {
 	x0, y0 := Rotate(rot, graph.X0, graph.Y0)
 	x1, y1 := Rotate(rot, graph.X1, graph.Y1)
 
@@ -138,7 +138,7 @@ func DrawGraphLine(dc DrawingContext, graph *GraphicMark, xc int, yc int, rot in
 	dc.Line(x0+xc, y0+yc, x1+xc, y1+yc, col, width)
 }
 
-func DrawGraphCurve(dc DrawingContext, graph *GraphicMark, xc int, yc int, rot int) {
+func (graph *GraphicMark) drawCurve(dc DrawingContext, xc int, yc int, rot int) {
 	x0, y0 := Rotate(rot, graph.X0, graph.Y0)
 	cx0, cy0 := Rotate(rot, graph.CX0, graph.CY0)
 	x1, y1 := Rotate(rot, graph.X1, graph.Y1)
@@ -149,7 +149,7 @@ func DrawGraphCurve(dc DrawingContext, graph *GraphicMark, xc int, yc int, rot i
 	dc.Curve(x0+xc, y0+yc, cx0+xc, cy0+yc, cx1+xc, cy1+yc, x1+xc, y1+yc, col, width)
 }
 
-func DrawGraphText(dc DrawingContext, graph *GraphicMark, xc int, yc int, rot int) {
+func (graph *GraphicMark) drawText(dc DrawingContext, xc int, yc int, rot int) {
 
 	x0, y0 := Rotate(rot, graph.X0, graph.Y0)
 	col := dc.MapColor(graph.Color, GRAPHICS)
@@ -199,7 +199,7 @@ func DrawGraphText(dc DrawingContext, graph *GraphicMark, xc int, yc int, rot in
 	dc.Text(graph.Text, x0+xc, y0+yc, angle, anchor, col, size, font)
 }
 
-func DrawAnnotation(dc DrawingContext, ann *Annotation, xc int, yc int, rot int) {
+func (ann *Annotation) Draw(dc DrawingContext, xc int, yc int, rot int) {
 
 	if !ann.Vis {
 		return
@@ -254,7 +254,7 @@ func DrawAnnotation(dc DrawingContext, ann *Annotation, xc int, yc int, rot int)
 	dc.Text(ann.Value, x0+xc, y0+yc, angle, anchor, col, size, font)
 }
 
-func DrawPin(dc DrawingContext, pin *Pin, xc int, yc int, rot int) {
+func (pin *Pin) Draw(dc DrawingContext, xc int, yc int, rot int) {
 
 	x0, y0 := Rotate(rot, pin.X0, pin.Y0)
 	x1, y1 := Rotate(rot, pin.X1, pin.Y1)
@@ -263,7 +263,7 @@ func DrawPin(dc DrawingContext, pin *Pin, xc int, yc int, rot int) {
 	dc.Line(x0+xc, y0+yc, x1+xc, y1+yc, col, width)
 
 	for _, ann := range pin.Annotations {
-		DrawAnnotation(dc, ann, x0+xc, y0+yc, rot)
+		ann.Draw(dc, x0+xc, y0+yc, rot)
 	}
 }
 
